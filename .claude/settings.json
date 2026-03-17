@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(sudo chown:*)",
+      "Bash(npm run:*)",
+      "Bash(grep -l \"unused\\\\|never read\" src/**/*.tsx)",
+      "Bash(pkill -f vite)"
+    ],
+    "additionalDirectories": [
+      "/Users/lllllxinl/.npm/_cacache",
+      "/Users/lllllxinl/.claude/plans"
+    ]
+  }
+}
