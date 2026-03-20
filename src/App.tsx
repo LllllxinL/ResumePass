@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, LayoutGrid, BarChart3, Search, Trash2 } from 'lucide-react';
+import { Plus, LayoutGrid, BarChart3, Search, Trash2, User } from 'lucide-react';
 import { ApplicationForm } from './components/ApplicationForm';
 import { KanbanBoard } from './components/KanbanBoard';
 import { Statistics } from './components/Statistics';
@@ -10,9 +10,10 @@ import { UserMenu } from './components/auth/UserMenu';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useApplications } from './hooks/useApplications';
 import { applicationStorage } from './utils/storage';
+import { ProfilePage } from './components/pages/ProfilePage';
 import type { Application } from './types';
 
-type ViewMode = 'kanban' | 'stats';
+type ViewMode = 'kanban' | 'stats' | 'profile';
 
 // 主应用内容组件
 const MainApp = () => {
@@ -123,6 +124,17 @@ const MainApp = () => {
                 <BarChart3 className="w-4 h-4" />
                 统计
               </button>
+              <button
+                onClick={() => setViewMode('profile')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'profile'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                我的档案
+              </button>
             </div>
 
             <div className="flex items-center gap-3">
@@ -146,6 +158,8 @@ const MainApp = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {viewMode === 'stats' ? (
           <Statistics />
+        ) : viewMode === 'profile' ? (
+          <ProfilePage />
         ) : (
           <>
             {/* 搜索栏 */}

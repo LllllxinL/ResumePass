@@ -456,3 +456,182 @@
 ---
 
 **文档结束**
+
+---
+
+# 附录 B：AI简历生成器 - Coze 工作流 PRD
+
+## B.1 产品概述
+
+### B.1.1 功能背景
+用户在投递简历时，即使是同一岗位类型（如产品经理），不同细分方向（商业化产品经理、策略产品经理、AI产品经理）的侧重点也截然不同。用户需要为每个岗位定制简历，提高初筛通过率。
+
+### B.1.2 工作流程
+```
+用户输入经历 → 粘贴岗位JD → AI解析JD → AI匹配经历 → 用户确认调整 → AI优化表述 → 生成简历
+```
+
+---
+
+## B.2 Coze 工作流节点设计
+
+### 工作流概览
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│  输入节点 │───→│ JD解析节点│───→│ 匹配节点  │───→│ 生成节点  │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘
+```
+
+### 节点 1：JD 解析节点
+**Prompt**：
+```
+你是一位专业的 HR 和招聘专家。请分析以下岗位 JD，提取关键信息。
+
+JD 内容：
+{{job_description}}
+
+请按以下 JSON 格式输出：
+{
+  "company": "公司名称",
+  "position": "岗位名称",
+  "position_type": "岗位类型",
+  "core_requirements": ["核心要求1", "核心要求2"],
+  "required_skills": ["必备技能1", "必备技能2"],
+  "preferred_skills": ["加分技能1"],
+  "responsibilities": ["职责1", "职责2"],
+  "capabilities_needed": ["所需能力1"],
+  "keywords": ["关键词1", "关键词2"]
+}
+```
+
+### 节点 2：经历匹配节点
+**Prompt**：
+```
+你是一位资深的简历顾问。请根据 JD 分析结果，从用户经历中选出最匹配的。
+
+JD 分析：{{jd_analysis}}
+用户经历：{{user_experiences}}
+
+输出格式：
+{
+  "matched_experiences": [
+    {
+      "experience_id": "ID",
+      "match_score": 85,
+      "match_reason": "匹配理由"
+    }
+  ],
+  "gap_analysis": {
+    "missing_skills": ["缺失技能"],
+    "suggestions": "补充建议"
+  }
+}
+```
+
+### 节点 3：内容生成节点
+**Prompt**：
+```
+你是一位专业的简历优化专家，精通 STAR 法则。
+
+请为每条经历生成优化后的描述，要求：
+1. 使用 STAR 法则结构化
+2. 突出与 JD 相关的关键词
+3. 量化成果（使用数字、百分比）
+4. 控制字数在 100-150 字
+
+输出格式：
+{
+  "optimized_experiences": [
+    {
+      "experience_id": "ID",
+      "optimized": "优化后的描述",
+      "star_breakdown": {
+        "situation": "情境",
+        "task": "任务",
+        "action": "行动",
+        "result": "结果"
+      }
+    }
+  ],
+  "personal_summary": "个人总结"
+}
+```
+
+---
+
+## B.3 输入输出格式
+
+### 输入参数（调整后）
+
+#### 方案 A：前端预存经历，投递时只传 ID 列表
+```json
+{
+  "selected_experience_ids": ["exp_1", "exp_2", "exp_3"],
+  "job_description": "string",
+  "company_name": "string",
+  "position_name": "string"
+}
+```
+**说明**：经历数据存在前端 LocalStorage，选中后只传 ID，工作流节点里用代码节点拼接完整经历
+
+#### 方案 B：前端直接传入完整经历（推荐）
+```json
+{
+  "selected_experiences": {
+    "internships": [...],
+    "projects": [...],
+    "skills": [...]
+  },
+  "job_description": "string",
+  "company_name": "string",
+  "position_name": "string"
+}
+```
+**说明**：前端根据用户选择，从 LocalStorage 取出对应经历，组装后传给 Coze
+
+**推荐方案 B**，因为：
+1. 工作流逻辑更简单，不需要代码节点查数据
+2. 前端控制更灵活，可以预处理数据
+3. 减少 Coze 节点的复杂度
+
+### 输出格式
+```json
+{
+  "success": true,
+  "data": {
+    "jd_analysis": {...},
+    "matching_result": {...},
+    "generated_content": {...}
+  }
+}
+```
+
+---
+
+## B.4 前端集成
+
+### API 调用
+```typescript
+const generateResume = async (params) => {
+  const response = await fetch('https://api.coze.cn/v1/workflow/run', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      workflow_id: WORKFLOW_ID,
+      parameters: params,
+    }),
+  });
+  return response.json();
+};
+```
+
+### 用户流程
+1. 用户选择要使用的经历
+2. 粘贴目标岗位 JD
+3. 系统显示解析进度
+4. 展示 AI 匹配结果（可调整）
+5. 展示优化后的简历（可编辑）
+6. 保存/导出简历

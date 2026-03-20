@@ -3,6 +3,8 @@ import type { Application } from '../types';
 import { JOB_TYPES, CHANNELS } from '../types';
 import { UrlParserInput } from './UrlParserInput';
 import { JDParserInput } from './JDParserInput';
+import { ResumeGenerator } from './resume/ResumeGenerator';
+import { hasAnyExperiences } from '../utils/experienceStorage';
 import type { ParsedJobData } from '../utils/urlParser';
 import type { ParsedJobData as JDParsedJobData } from '../utils/jobDescriptionParser';
 
@@ -63,6 +65,18 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
 
   // Check if this is a new entry (not editing)
   const isNewEntry = !initialData?.id;
+
+  // Resume generator modal state
+  const [showResumeGenerator, setShowResumeGenerator] = useState(false);
+  const hasExperiences = hasAnyExperiences();
+
+  const handleApplyResume = (resumeText: string) => {
+    setFormData(prev => ({
+      ...prev,
+      notes: prev.notes ? `${prev.notes}\n\n【AI生成简历】\n${resumeText}` : `【AI生成简历】\n${resumeText}`
+    }));
+    setShowResumeGenerator(false);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -233,7 +247,19 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">岗位描述</label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-sm font-medium text-gray-700">岗位描述</label>
+          {hasExperiences && formData.jobDescription && formData.companyName && formData.jobTitle && (
+            <button
+              type="button"
+              onClick={() => setShowResumeGenerator(true)}
+              className="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1"
+            >
+              <span>✨</span>
+              <span>AI生成定制简历</span>
+            </button>
+          )}
+        </div>
         <textarea
           value={formData.jobDescription}
           onChange={(e) => handleChange('jobDescription', e.target.value)}
@@ -241,6 +267,11 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           placeholder="复制JD内容到这里..."
         />
+        {!hasExperiences && (
+          <p className="text-xs text-gray-400 mt-1">
+            提示：录入个人经历后可使用AI生成定制简历功能
+          </p>
+        )}
       </div>
 
       <div>
@@ -269,6 +300,19 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
           保存
         </button>
       </div>
+
+      {/* Resume Generator Modal */}
+      {showResumeGenerator && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <ResumeGenerator
+            jobDescription={formData.jobDescription}
+            companyName={formData.companyName}
+            positionName={formData.jobTitle}
+            onApply={handleApplyResume}
+            onClose={() => setShowResumeGenerator(false)}
+          />
+        </div>
+      )}
     </form>
   );
 };
