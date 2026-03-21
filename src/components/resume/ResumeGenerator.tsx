@@ -121,42 +121,56 @@ export const ResumeGenerator = ({ jobDescription, companyName, positionName, onA
       {result && (
         <div className="space-y-4">
           {/* JD 分析 */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-medium text-sm mb-2">JD 分析</h4>
-            <div className="flex flex-wrap gap-2">
-              {result.jd_analysis.keywords.map((kw, i) => (
-                <span key={i} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
-                  {kw}
-                </span>
-              ))}
+          {result.jd_analysis?.keywords?.length > 0 && (
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium text-sm mb-2">JD 分析</h4>
+              <div className="flex flex-wrap gap-2">
+                {result.jd_analysis.keywords.map((kw, i) => (
+                  <span key={i} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                    {kw}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 匹配的经历 */}
-          <div>
-            <h4 className="font-medium text-sm mb-2">AI 推荐使用的经历</h4>
-            <div className="space-y-2">
-              {result.matching_result.matched_experiences.map((match, i) => (
-                <div key={i} className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
-                  <div>
-                    <p className="font-medium text-sm">{match.experience_id}</p>
-                    <p className="text-xs text-gray-600">{match.match_reason}</p>
+          {result.matching_result?.matched_experiences?.length > 0 && (
+            <div>
+              <h4 className="font-medium text-sm mb-2">AI 推荐使用的经历</h4>
+              <div className="space-y-2">
+                {result.matching_result.matched_experiences.map((match, i) => (
+                  <div key={i} className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
+                    <div>
+                      <p className="font-medium text-sm">{match.experience_id}</p>
+                      <p className="text-xs text-gray-600">{match.match_reason}</p>
+                    </div>
+                    <span className="text-green-600 font-medium text-sm">{match.match_score}分</span>
                   </div>
-                  <span className="text-green-600 font-medium text-sm">{match.match_score}分</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 生成的简历文本 */}
           <div>
             <h4 className="font-medium text-sm mb-2">简历内容</h4>
-            <textarea
-              value={result.generated_content.full_resume_text}
-              readOnly
-              rows={10}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono bg-gray-50"
-            />
+            {result.generated_content?.full_resume_text ? (
+              <textarea
+                value={result.generated_content.full_resume_text}
+                readOnly
+                rows={10}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono bg-gray-50"
+              />
+            ) : (
+              <div className="bg-yellow-50 p-4 rounded-lg text-sm text-yellow-800">
+                <p className="font-medium mb-1">工作流返回数据结构异常</p>
+                <p className="text-xs">请打开浏览器 Console（F12）查看 [Coze] 日志，将内容发给开发者排查。</p>
+                <pre className="mt-2 text-xs overflow-auto max-h-32 bg-white p-2 rounded">
+                  {JSON.stringify(result, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
 
           {/* 操作按钮 */}

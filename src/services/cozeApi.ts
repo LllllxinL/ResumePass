@@ -100,9 +100,20 @@ export const generateResumeWithCoze = async (
 
   let parsed: CozeWorkflowResult;
   try {
+    // Layer 1: result.data may be a JSON string
     const data = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
-    parsed = (data.output ?? data) as CozeWorkflowResult;
-  } catch {
+    console.log('[Coze] parsed data:', data);
+
+    // Layer 2: data.output may also be a JSON string (LLM output)
+    let output = data.output ?? data;
+    if (typeof output === 'string') {
+      output = JSON.parse(output);
+    }
+    console.log('[Coze] final output:', output);
+
+    parsed = output as CozeWorkflowResult;
+  } catch (e) {
+    console.error('[Coze] parse error, raw result:', result);
     throw new Error('解析工作流返回结果失败，请检查工作流输出格式');
   }
 
