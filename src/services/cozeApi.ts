@@ -21,46 +21,7 @@ export interface UserExperiences {
 }
 
 export interface CozeWorkflowResult {
-  jd_analysis: {
-    company: string;
-    position: string;
-    position_type: string;
-    core_requirements: string[];
-    required_skills: string[];
-    preferred_skills: string[];
-    responsibilities: string[];
-    capabilities_needed: string[];
-    keywords: string[];
-  };
-  matching_result: {
-    matched_experiences: Array<{
-      experience_id: string;
-      match_score: number;
-      match_reason: string;
-      relevant_skills?: string[];
-    }>;
-    gap_analysis: {
-      missing_skills: string[];
-      suggestions: string;
-    };
-  };
-  generated_content: {
-    personal_summary: string;
-    matched_experiences: Array<{
-      experience_id: string;
-      original: string;
-      optimized: string;
-      star_breakdown?: {
-        situation: string;
-        task: string;
-        action: string;
-        result: string;
-      };
-      keywords_matched?: string[];
-    }>;
-    skills_highlight: string[];
-    full_resume_text: string;
-  };
+  resume_text: string;
 }
 
 export const generateResumeWithCoze = async (

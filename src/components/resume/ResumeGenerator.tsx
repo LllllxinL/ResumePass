@@ -47,8 +47,8 @@ export const ResumeGenerator = ({ jobDescription, companyName, positionName, onA
   };
 
   const handleCopy = () => {
-    if (result?.generated_content?.full_resume_text) {
-      navigator.clipboard.writeText(result.generated_content.full_resume_text);
+    if (result?.resume_text) {
+      navigator.clipboard.writeText(result.resume_text);
       alert('已复制到剪贴板');
     }
   };
@@ -120,46 +120,14 @@ export const ResumeGenerator = ({ jobDescription, companyName, positionName, onA
 
       {result && (
         <div className="space-y-4">
-          {/* JD 分析 */}
-          {result.jd_analysis?.keywords?.length > 0 && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-sm mb-2">JD 分析</h4>
-              <div className="flex flex-wrap gap-2">
-                {result.jd_analysis.keywords.map((kw, i) => (
-                  <span key={i} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
-                    {kw}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 匹配的经历 */}
-          {result.matching_result?.matched_experiences?.length > 0 && (
-            <div>
-              <h4 className="font-medium text-sm mb-2">AI 推荐使用的经历</h4>
-              <div className="space-y-2">
-                {result.matching_result.matched_experiences.map((match, i) => (
-                  <div key={i} className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">{match.experience_id}</p>
-                      <p className="text-xs text-gray-600">{match.match_reason}</p>
-                    </div>
-                    <span className="text-green-600 font-medium text-sm">{match.match_score}分</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* 生成的简历文本 */}
           <div>
             <h4 className="font-medium text-sm mb-2">简历内容</h4>
-            {result.generated_content?.full_resume_text ? (
+            {result.resume_text ? (
               <textarea
-                value={result.generated_content.full_resume_text}
+                value={result.resume_text}
                 readOnly
-                rows={10}
+                rows={12}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono bg-gray-50"
               />
             ) : (
@@ -188,7 +156,7 @@ export const ResumeGenerator = ({ jobDescription, companyName, positionName, onA
               复制文本
             </button>
             <button
-              onClick={() => onApply(result.generated_content.full_resume_text)}
+              onClick={() => onApply(result.resume_text)}
               className="flex-1 px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700"
             >
               用于此投递
