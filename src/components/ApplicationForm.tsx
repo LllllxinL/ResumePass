@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Application } from '../types';
 import { JOB_TYPES, CHANNELS } from '../types';
 import { UrlParserInput } from './UrlParserInput';
@@ -68,7 +68,10 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
 
   // Resume generator modal state
   const [showResumeGenerator, setShowResumeGenerator] = useState(false);
-  const hasExperiences = hasAnyExperiences();
+  const [hasExperiences, setHasExperiences] = useState(false);
+  useEffect(() => {
+    hasAnyExperiences().then(setHasExperiences);
+  }, []);
 
   const handleApplyResume = (resumeText: string) => {
     setFormData(prev => ({

@@ -15,34 +15,36 @@ export const ProfilePage = () => {
   const [newSkill, setNewSkill] = useState('');
 
   useEffect(() => {
-    setExperiences(getAllExperiences());
+    getAllExperiences().then(setExperiences);
   }, []);
 
-  const handleAddExperience = (type: Experience['type'], data: Omit<Experience, 'id' | 'type'>) => {
-    addExperience({ ...data, type });
-    setExperiences(getAllExperiences());
+  const handleAddExperience = async (type: Experience['type'], data: Omit<Experience, 'id' | 'type'>) => {
+    await addExperience({ ...data, type });
+    const updated = await getAllExperiences();
+    setExperiences(updated);
     setIsAdding(false);
   };
 
-  const handleDeleteExperience = (id: string, type: Experience['type']) => {
+  const handleDeleteExperience = async (id: string, type: Experience['type']) => {
     if (confirm('确定删除这条经历吗？')) {
-      deleteExperience(id, type);
-      setExperiences(getAllExperiences());
+      await deleteExperience(id, type);
+      const updated = await getAllExperiences();
+      setExperiences(updated);
     }
   };
 
-  const handleAddSkill = () => {
+  const handleAddSkill = async () => {
     if (newSkill.trim() && !experiences.skills.includes(newSkill.trim())) {
       const updatedSkills = [...experiences.skills, newSkill.trim()];
-      updateSkills(updatedSkills);
+      await updateSkills(updatedSkills);
       setExperiences({ ...experiences, skills: updatedSkills });
       setNewSkill('');
     }
   };
 
-  const handleRemoveSkill = (skill: string) => {
+  const handleRemoveSkill = async (skill: string) => {
     const updatedSkills = experiences.skills.filter(s => s !== skill);
-    updateSkills(updatedSkills);
+    await updateSkills(updatedSkills);
     setExperiences({ ...experiences, skills: updatedSkills });
   };
 

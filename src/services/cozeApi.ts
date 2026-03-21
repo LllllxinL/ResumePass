@@ -1,6 +1,6 @@
 const COZE_API_URL = 'https://api.coze.cn/v1/workflow/run';
 const WORKFLOW_ID = '7619198473276096564';
-const COZE_TOKEN = 'pat_UMLU8DhvkpSRUsgrcogz7BAFnqyo9uL05whdXUQM9CxJvSn1tUKUGt4hTIUj2ibC';
+const COZE_TOKEN = import.meta.env.VITE_COZE_TOKEN;
 
 export interface Experience {
   id: string;

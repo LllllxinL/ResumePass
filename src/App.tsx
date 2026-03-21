@@ -29,8 +29,7 @@ const MainApp = () => {
   // 生成示例数据（仅在登录后执行一次）
   useEffect(() => {
     if (user) {
-      applicationStorage.generateDemoData();
-      refresh();
+      applicationStorage.generateDemoData().then(() => refresh());
     }
   }, [user, refresh]);
 
@@ -77,10 +76,10 @@ const MainApp = () => {
     }
   };
 
-  const clearAllData = () => {
+  const clearAllData = async () => {
     if (confirm('确定清空所有数据吗？此操作不可恢复！')) {
-      applicationStorage.clear();
-      refresh();
+      await applicationStorage.clear();
+      await refresh();
       setIsPanelOpen(false);
       setSelectedApp(null);
     }

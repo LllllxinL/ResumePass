@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { generateResumeWithCoze, hasExperiences, type CozeWorkflowResult } from '../../services/cozeApi';
+import { useState, useEffect } from 'react';
+import { generateResumeWithCoze, hasExperiences, type CozeWorkflowResult, type UserExperiences } from '../../services/cozeApi';
 import { getAllExperiences } from '../../utils/experienceStorage';
 
 interface ResumeGeneratorProps {
@@ -15,9 +15,15 @@ export const ResumeGenerator = ({ jobDescription, companyName, positionName, onA
   const [step, setStep] = useState<'confirm' | 'generating' | 'result'>('confirm');
   const [result, setResult] = useState<CozeWorkflowResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [experiences, setExperiencesData] = useState<UserExperiences>({ internships: [], projects: [], campus: [], skills: [] });
+  const [hasData, setHasData] = useState(false);
 
-  const experiences = getAllExperiences();
-  const hasData = hasExperiences(experiences);
+  useEffect(() => {
+    getAllExperiences().then(exp => {
+      setExperiencesData(exp);
+      setHasData(hasExperiences(exp));
+    });
+  }, []);
 
   const handleGenerate = async () => {
     if (!hasData) {

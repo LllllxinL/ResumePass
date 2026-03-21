@@ -1,130 +1,91 @@
+import { supabase } from '../lib/supabase';
 import type { Experience, UserExperiences } from '../services/cozeApi';
 
-const STORAGE_KEY = 'interntrack_experiences';
-
-// 获取当前用户ID
-const getCurrentUserId = (): string | null => {
-  const auth = localStorage.getItem('interntrack_auth');
-  if (auth) {
-    try {
-      const parsed = JSON.parse(auth);
-      return parsed.user?.id || null;
-    } catch {
-      return null;
-    }
-  }
-  return null;
+const getUserId = async (): Promise<string> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('未登录');
+  return user.id;
 };
 
-// 获取用户特定的storage key
-const getStorageKey = (): string => {
-  const userId = getCurrentUserId();
-  return userId ? `${STORAGE_KEY}_${userId}` : STORAGE_KEY;
-};
+// 把数据库行转换为 Experience 对象
+const rowToExperience = (row: any): Experience => ({
+  id: row.id,
+  type: row.type,
+  title: row.title ?? '',
+  organization: row.organization,
+  role: row.role,
+  duration: row.duration,
+  description: row.description ?? '',
+  keywords: row.keywords ?? [],
+});
 
-// 获取所有经历
-export const getAllExperiences = (): UserExperiences => {
-  const key = getStorageKey();
-  const data = localStorage.getItem(key);
-  if (data) {
-    return JSON.parse(data);
+// 获取所有经历，重建 UserExperiences 结构
+export const getAllExperiences = async (): Promise<UserExperiences> => {
+  const { data, error } = await supabase
+    .from('experiences')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    return { internships: [], projects: [], campus: [], skills: [] };
   }
+
+  const rows = data ?? [];
   return {
-    internships: [],
-    projects: [],
-    campus: [],
-    skills: [],
+    internships: rows.filter(r => r.type === 'internship').map(rowToExperience),
+    projects: rows.filter(r => r.type === 'project').map(rowToExperience),
+    campus: rows.filter(r => r.type === 'campus').map(rowToExperience),
+    skills: rows.filter(r => r.type === 'skill').map(r => r.skill_name as string),
   };
 };
 
-// 保存所有经历
-export const saveAllExperiences = (experiences: UserExperiences): void => {
-  const key = getStorageKey();
-  localStorage.setItem(key, JSON.stringify(experiences));
+// 添加一条经历
+export const addExperience = async (experience: Omit<Experience, 'id'>): Promise<Experience> => {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('experiences')
+    .insert({
+      user_id: userId,
+      type: experience.type,
+      title: experience.title ?? null,
+      organization: experience.organization ?? null,
+      role: experience.role ?? null,
+      duration: experience.duration ?? null,
+      description: experience.description ?? null,
+      keywords: experience.keywords ?? [],
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToExperience(data);
 };
 
-// 添加经历
-export const addExperience = (experience: Omit<Experience, 'id'>): Experience => {
-  const experiences = getAllExperiences();
-  const newExperience: Experience = {
-    ...experience,
-    id: crypto.randomUUID(),
-  };
-
-  if (experience.type === 'internship') {
-    experiences.internships.push(newExperience);
-  } else if (experience.type === 'project') {
-    experiences.projects.push(newExperience);
-  } else if (experience.type === 'campus') {
-    experiences.campus.push(newExperience);
-  }
-
-  saveAllExperiences(experiences);
-  return newExperience;
+// 删除一条经历
+export const deleteExperience = async (id: string, _type: Experience['type']): Promise<boolean> => {
+  const { error } = await supabase.from('experiences').delete().eq('id', id);
+  return !error;
 };
 
-// 删除经历
-export const deleteExperience = (id: string, type: Experience['type']): boolean => {
-  const experiences = getAllExperiences();
+// 更新技能列表（先删除所有 skill 行，再批量插入）
+export const updateSkills = async (skills: string[]): Promise<void> => {
+  const userId = await getUserId();
+  await supabase.from('experiences').delete().eq('user_id', userId).eq('type', 'skill');
 
-  if (type === 'internship') {
-    experiences.internships = experiences.internships.filter(e => e.id !== id);
-  } else if (type === 'project') {
-    experiences.projects = experiences.projects.filter(e => e.id !== id);
-  } else if (type === 'campus') {
-    experiences.campus = experiences.campus.filter(e => e.id !== id);
-  }
+  if (skills.length === 0) return;
 
-  saveAllExperiences(experiences);
-  return true;
+  const rows = skills.map(name => ({
+    user_id: userId,
+    type: 'skill',
+    skill_name: name,
+    description: '',
+  }));
+  await supabase.from('experiences').insert(rows);
 };
 
-// 更新经历
-export const updateExperience = (id: string, updates: Partial<Experience>): Experience | null => {
-  const experiences = getAllExperiences();
-  const type = updates.type;
-
-  let target: Experience | undefined;
-  if (type === 'internship') {
-    target = experiences.internships.find(e => e.id === id);
-  } else if (type === 'project') {
-    target = experiences.projects.find(e => e.id === id);
-  } else if (type === 'campus') {
-    target = experiences.campus.find(e => e.id === id);
-  }
-
-  if (target) {
-    Object.assign(target, updates);
-    saveAllExperiences(experiences);
-    return target;
-  }
-  return null;
-};
-
-// 更新技能
-export const updateSkills = (skills: string[]): void => {
-  const experiences = getAllExperiences();
-  experiences.skills = skills;
-  saveAllExperiences(experiences);
-};
-
-// 检查是否有经历
-export const hasAnyExperiences = (): boolean => {
-  const experiences = getAllExperiences();
-  return (
-    experiences.internships.length > 0 ||
-    experiences.projects.length > 0 ||
-    experiences.campus.length > 0 ||
-    experiences.skills.length > 0
-  );
-};
-
-// 获取经历总数
-export const getExperienceCount = (): number => {
-  const experiences = getAllExperiences();
-  return (
-    experiences.internships.length +
-    experiences.projects.length +
-    experiences.campus.length
-  );
+// 检查是否有任何经历
+export const hasAnyExperiences = async (): Promise<boolean> => {
+  const { count } = await supabase
+    .from('experiences')
+    .select('*', { count: 'exact', head: true });
+  return (count ?? 0) > 0;
 };

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getStatistics } from '../utils/storage';
 import { STATUS_CONFIG, STATUS_ORDER } from '../types';
@@ -6,8 +6,14 @@ import { Briefcase, TrendingUp, Award, Calendar } from 'lucide-react';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6b7280', '#ec4899', '#14b8a6'];
 
+const defaultStats = { total: 0, byStatus: {} as Record<string, number>, byChannel: {} as Record<string, number>, byJobType: {} as Record<string, number>, thisWeekCount: 0, interviewRate: 0, offerRate: 0, interviewCount: 0, offerCount: 0, respondedCount: 0 };
+
 export const Statistics = () => {
-  const stats = useMemo(() => getStatistics(), []);
+  const [stats, setStats] = useState(defaultStats);
+
+  useEffect(() => {
+    getStatistics().then(setStats);
+  }, []);
 
   // 状态分布数据
   const statusData = STATUS_ORDER
