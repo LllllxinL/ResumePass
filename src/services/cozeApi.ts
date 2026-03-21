@@ -93,11 +93,20 @@ export const generateResumeWithCoze = async (
 
   const result = await response.json();
 
-  if (result.data && result.data.output) {
-    return result.data.output as CozeWorkflowResult;
+  // Coze API returns data as a JSON string
+  if (result.code !== 0) {
+    throw new Error(result.msg || `Coze 工作流执行失败: code ${result.code}`);
   }
 
-  return result as CozeWorkflowResult;
+  let parsed: CozeWorkflowResult;
+  try {
+    const data = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+    parsed = (data.output ?? data) as CozeWorkflowResult;
+  } catch {
+    throw new Error('解析工作流返回结果失败，请检查工作流输出格式');
+  }
+
+  return parsed;
 };
 
 export const hasExperiences = (experiences: UserExperiences): boolean => {
