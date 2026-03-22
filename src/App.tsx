@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, LayoutGrid, BarChart3, Search, Trash2, User } from 'lucide-react';
+import { Plus, LayoutGrid, BarChart3, Search, Trash2, User, MessageSquare } from 'lucide-react';
 import { ApplicationForm } from './components/ApplicationForm';
 import { KanbanBoard } from './components/KanbanBoard';
 import { Statistics } from './components/Statistics';
@@ -11,9 +11,10 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useApplications } from './hooks/useApplications';
 import { applicationStorage } from './utils/storage';
 import { ProfilePage } from './components/pages/ProfilePage';
+import { InterviewsPage } from './components/pages/InterviewsPage';
 import type { Application } from './types';
 
-type ViewMode = 'kanban' | 'stats' | 'profile';
+type ViewMode = 'kanban' | 'stats' | 'profile' | 'interviews';
 
 // 主应用内容组件
 const MainApp = () => {
@@ -134,10 +135,21 @@ const MainApp = () => {
                 <User className="w-4 h-4" />
                 我的档案
               </button>
+              <button
+                onClick={() => setViewMode('interviews')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'interviews'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <MessageSquare className="w-4 h-4" />
+                面经
+              </button>
             </div>
 
             <div className="flex items-center gap-2">
-              {viewMode !== 'stats' && (
+              {viewMode !== 'stats' && viewMode !== 'interviews' && (
                 <button
                   onClick={() => setIsModalOpen(true)}
                   className="flex items-center gap-1.5 px-3 py-2 md:px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
@@ -159,6 +171,8 @@ const MainApp = () => {
           <Statistics />
         ) : viewMode === 'profile' ? (
           <ProfilePage />
+        ) : viewMode === 'interviews' ? (
+          <InterviewsPage />
         ) : (
           <>
             {/* 搜索栏 */}
@@ -240,6 +254,15 @@ const MainApp = () => {
           >
             <User className="w-5 h-5" />
             档案
+          </button>
+          <button
+            onClick={() => setViewMode('interviews')}
+            className={`flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium transition-colors ${
+              viewMode === 'interviews' ? 'text-primary-600' : 'text-gray-500'
+            }`}
+          >
+            <MessageSquare className="w-5 h-5" />
+            面经
           </button>
         </div>
       </nav>
