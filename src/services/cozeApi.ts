@@ -1,5 +1,6 @@
 const COZE_API_URL = 'https://api.coze.cn/v1/workflow/run';
 const WORKFLOW_ID = '7619198473276096564';
+const JD_PARSER_WORKFLOW_ID = '7619991586596913171';
 const COZE_TOKEN = import.meta.env.VITE_COZE_TOKEN;
 
 export interface Experience {
@@ -79,6 +80,56 @@ export const generateResumeWithCoze = async (
   }
 
   return parsed;
+};
+
+export interface JDParseResult {
+  companyName: string;
+  jobTitle: string;
+  jobType: string;
+  city: string;
+  salaryRange: string;
+  tags: string[];
+}
+
+export const parseJDWithCoze = async (jobDescription: string): Promise<JDParseResult> => {
+  const response = await fetch(COZE_API_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${COZE_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      workflow_id: JD_PARSER_WORKFLOW_ID,
+      parameters: {
+        job_description: jobDescription,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `调用 Coze 工作流失败: ${response.status}`);
+  }
+
+  const result = await response.json();
+
+  if (result.code !== 0) {
+    throw new Error(result.msg || `Coze 工作流执行失败: code ${result.code}`);
+  }
+
+  try {
+    const data = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+    let output = data.result ?? data.output ?? data;
+    if (typeof output === 'string') {
+      // 去掉可能的 markdown 代码块包裹
+      output = output.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+      output = JSON.parse(output);
+    }
+    return output as JDParseResult;
+  } catch (e) {
+    console.error('[Coze JD Parser] parse error, raw result:', result);
+    throw new Error('解析工作流返回结果失败');
+  }
 };
 
 export const hasExperiences = (experiences: UserExperiences): boolean => {
