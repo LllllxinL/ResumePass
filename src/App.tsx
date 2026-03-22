@@ -93,10 +93,10 @@ const MainApp = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">IT</span>
+                <span className="text-white font-bold text-sm">RP</span>
               </div>
-              <h1 className="text-xl font-bold text-gray-900">实习通</h1>
-              <span className="text-xs text-gray-400 hidden sm:inline">InternTrack</span>
+              <h1 className="text-xl font-bold text-gray-900">简历通</h1>
+              <span className="text-xs text-gray-400 hidden sm:inline">ResumePass</span>
             </div>
 
             {/* View Switcher - 仅桌面端显示 */}

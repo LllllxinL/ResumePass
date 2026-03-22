@@ -22,7 +22,7 @@ export const LoginPage = ({ onLogin, onRegister }: LoginPageProps) => {
             <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
               <Briefcase className="w-6 h-6" />
             </div>
-            <span className="text-2xl font-bold">实习通</span>
+            <span className="text-2xl font-bold">简历通</span>
           </div>
         </div>
 
@@ -40,7 +40,7 @@ export const LoginPage = ({ onLogin, onRegister }: LoginPageProps) => {
         </div>
 
         <div className="text-sm text-primary-200">
-          © 2024 实习通 InternTrack
+          © 2024 简历通 ResumePass
         </div>
       </div>
 
@@ -52,7 +52,7 @@ export const LoginPage = ({ onLogin, onRegister }: LoginPageProps) => {
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
               <Briefcase className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">实习通</span>
+            <span className="text-xl font-bold text-gray-900">简历通</span>
           </div>
 
           {/* 标题 */}
