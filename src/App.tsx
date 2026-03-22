@@ -99,8 +99,8 @@ const MainApp = () => {
               <span className="text-xs text-gray-400 hidden sm:inline">InternTrack</span>
             </div>
 
-            {/* View Switcher */}
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            {/* View Switcher - 仅桌面端显示 */}
+            <div className="hidden md:flex items-center bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('kanban')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
@@ -136,14 +136,14 @@ const MainApp = () => {
               </button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {viewMode !== 'stats' && (
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                  className="flex items-center gap-1.5 px-3 py-2 md:px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
                 >
                   <Plus className="w-4 h-4" />
-                  新增投递
+                  <span className="hidden sm:inline">新增投递</span>
                 </button>
               )}
               {/* 用户菜单 */}
@@ -154,7 +154,7 @@ const MainApp = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
         {viewMode === 'stats' ? (
           <Statistics />
         ) : viewMode === 'profile' ? (
@@ -162,8 +162,8 @@ const MainApp = () => {
         ) : (
           <>
             {/* 搜索栏 */}
-            <div className="mb-6 flex items-center gap-4">
-              <div className="relative flex-1 max-w-md">
+            <div className="mb-6 flex flex-wrap items-center gap-2">
+              <div className="relative flex-1 min-w-0">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
@@ -173,17 +173,19 @@ const MainApp = () => {
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
-              <div className="text-sm text-gray-500">
-                共 {filteredApps.length} 条记录
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="text-sm text-gray-500 whitespace-nowrap">
+                  共 {filteredApps.length} 条
+                </span>
+                <button
+                  onClick={clearAllData}
+                  className="flex items-center gap-1 px-2 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="清空所有数据"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">清空数据</span>
+                </button>
               </div>
-              <button
-                onClick={clearAllData}
-                className="ml-auto flex items-center gap-1.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="清空所有数据"
-              >
-                <Trash2 className="w-4 h-4" />
-                清空数据
-              </button>
             </div>
 
             {/* 看板视图 */}
@@ -208,6 +210,39 @@ const MainApp = () => {
         onDelete={handlePanelDelete}
         onStatusChange={handleStatusChange}
       />
+
+      {/* Bottom Navigation - 仅移动端显示 */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-10 md:hidden">
+        <div className="flex">
+          <button
+            onClick={() => setViewMode('kanban')}
+            className={`flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium transition-colors ${
+              viewMode === 'kanban' ? 'text-primary-600' : 'text-gray-500'
+            }`}
+          >
+            <LayoutGrid className="w-5 h-5" />
+            看板
+          </button>
+          <button
+            onClick={() => setViewMode('stats')}
+            className={`flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium transition-colors ${
+              viewMode === 'stats' ? 'text-primary-600' : 'text-gray-500'
+            }`}
+          >
+            <BarChart3 className="w-5 h-5" />
+            统计
+          </button>
+          <button
+            onClick={() => setViewMode('profile')}
+            className={`flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium transition-colors ${
+              viewMode === 'profile' ? 'text-primary-600' : 'text-gray-500'
+            }`}
+          >
+            <User className="w-5 h-5" />
+            档案
+          </button>
+        </div>
+      </nav>
 
       {/* Add Application Modal */}
       <Modal

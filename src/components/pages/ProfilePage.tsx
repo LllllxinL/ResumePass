@@ -74,12 +74,12 @@ export const ProfilePage = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 border-b border-gray-200">
+        <div className="flex gap-1 border-b border-gray-200 overflow-x-auto">
           {tabs.map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.key
                   ? 'border-primary-600 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -87,7 +87,7 @@ export const ProfilePage = () => {
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
-              <span className="ml-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+              <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
                 {tab.key === 'skills' ? experiences.skills.length : tab.key === 'internships' ? experiences.internships.length : tab.key === 'projects' ? experiences.projects.length : experiences.campus.length}
               </span>
             </button>
@@ -185,7 +185,7 @@ const ExperienceSection = ({ type, experiences, onAdd, onDelete, isAdding, setIs
       {/* Add Form */}
       {isAdding && (
         <form onSubmit={handleSubmit} className="bg-gray-50 p-4 rounded-lg space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               type="text"
               placeholder={titles[type].org}
@@ -258,7 +258,7 @@ const ExperienceSection = ({ type, experiences, onAdd, onDelete, isAdding, setIs
                 </div>
                 <button
                   onClick={() => onDelete(exp.id, type)}
-                  className="opacity-0 group-hover:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded transition-all"
+                  className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded transition-all"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
