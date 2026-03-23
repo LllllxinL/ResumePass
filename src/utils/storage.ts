@@ -3,6 +3,13 @@ import type { Application, Interview } from '../types';
 
 // ── 字段转换：数据库 snake_case ↔ TypeScript camelCase ──────────────
 
+// 状态迁移：旧状态映射到新状态
+const migrateStatus = (status: string): Application['status'] => {
+  if (status === 'screening') return 'applied';
+  if (status === 'accepted') return 'offer';
+  return status as Application['status'];
+};
+
 const rowToApplication = (row: any): Application => ({
   id: row.id,
   companyName: row.company_name,
@@ -13,7 +20,7 @@ const rowToApplication = (row: any): Application => ({
   channel: row.channel,
   jobUrl: row.job_url,
   applyDate: row.apply_date,
-  status: row.status,
+  status: migrateStatus(row.status),
   priority: row.priority,
   tags: row.tags ?? [],
   jobDescription: row.job_description,

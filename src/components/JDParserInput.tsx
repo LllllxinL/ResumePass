@@ -112,8 +112,11 @@ export const JDParserInput = ({ onParsed, disabled }: JDParserInputProps) => {
           }`}
         />
 
-        {/* 字符计数 */}
+        {/* 提示和字符计数 */}
         <div className="flex justify-between mt-1">
+          <span className="text-xs text-gray-400">
+            💡 建议从 BOSS直聘/实习僧网页版复制完整JD，App可能复制不全
+          </span>
           <span className="text-xs text-gray-400">
             {jdText.length} 字符
           </span>

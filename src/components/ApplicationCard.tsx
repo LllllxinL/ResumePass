@@ -95,7 +95,7 @@ export const ApplicationCard = ({ application, onEdit, onDelete, onStatusChange 
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xs text-gray-400">更新状态：</span>
           <div className="flex gap-1">
-            {['applied', 'screening', 'interview', 'offer', 'rejected'].map((s) => (
+            {['applied', 'read', 'interview', 'offer', 'rejected'].map((s) => (
               <button
                 key={s}
                 onClick={() => onStatusChange(application.id, s as Application['status'])}

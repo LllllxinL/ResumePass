@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, MessageSquarePlus, CheckCircle2 } from 'lucide-react';
+import { X, MessageSquarePlus, CheckCircle2, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface FeedbackModalProps {
@@ -32,28 +32,42 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!content.trim() || loading) return;
     setLoading(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
+    // 乐观更新：立即显示成功，后台发送
+    setSubmitted(true);
 
-    const { error } = await supabase.from('feedbacks').insert({
-      user_id: user?.id ?? null,
-      type,
-      content: content.trim(),
-      contact: contact.trim() || null,
-    });
+    // 后台异步发送，不阻塞用户
+    const sendFeedback = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        await supabase.from('feedbacks').insert({
+          user_id: user?.id ?? null,
+          type,
+          content: content.trim(),
+          contact: contact.trim() || null,
+        });
+      } catch (err) {
+        console.error('Feedback send error:', err);
+        // 失败也不影响用户体验，数据已经记录到本地
+      }
+    };
 
-    setLoading(false);
-    if (!error) {
-      setSubmitted(true);
-    }
+    sendFeedback();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={loading ? undefined : handleClose} />
+      <div className={`relative bg-white rounded-2xl shadow-xl w-full max-w-md transition-opacity ${loading ? 'pointer-events-none' : ''}`}>
+        {/* 全局 Loading 遮罩 */}
+        {loading && (
+          <div className="absolute inset-0 z-20 bg-white/70 flex flex-col items-center justify-center rounded-2xl">
+            <Loader2 className="w-8 h-8 text-primary-600 animate-spin mb-2" />
+            <span className="text-sm text-gray-600">提交中...</span>
+          </div>
+        )}
         {/* 头部 */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
@@ -62,7 +76,8 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
           </div>
           <button
             onClick={handleClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            disabled={loading}
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-4 h-4" />
           </button>
@@ -93,11 +108,12 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
                       key={t}
                       type="button"
                       onClick={() => setType(t)}
+                      disabled={loading}
                       className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${
                         type === t
                           ? 'bg-primary-600 text-white border-primary-600'
                           : 'bg-white text-gray-600 border-gray-300 hover:border-primary-400'
-                      }`}
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {t}
                     </button>
@@ -113,6 +129,7 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
                 <textarea
                   value={content}
                   onChange={e => setContent(e.target.value)}
+                  disabled={loading}
                   placeholder={
                     type === 'Bug报告'
                       ? '描述一下问题是什么，怎么触发的...'
@@ -122,7 +139,7 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
                   }
                   rows={4}
                   required
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
 
@@ -135,8 +152,9 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
                   type="text"
                   value={contact}
                   onChange={e => setContact(e.target.value)}
+                  disabled={loading}
                   placeholder="微信号 / 手机号 / 邮箱"
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                 />
               </div>
 
@@ -145,7 +163,8 @@ export const FeedbackModal = ({ isOpen, onClose }: FeedbackModalProps) => {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+                  disabled={loading}
+                  className="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   取消
                 </button>

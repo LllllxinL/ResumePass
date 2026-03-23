@@ -1,13 +1,11 @@
 // 投递进度状态
 export type ApplicationStatus =
   | 'applied'      // 已投递
-  | 'screening'    // 简历筛选中
   | 'read'         // 已读未回
-  | 'rejected'     // 已拒绝
   | 'interview'    // 约面/面试中
   | 'offer'        // 收到offer
-  | 'accepted'     // 已接受offer
-  | 'declined';    // 已拒绝offer
+  | 'declined'     // 已拒绝offer
+  | 'rejected';    // 不合适
 
 // 岗位类型
 export type JobType =
@@ -91,12 +89,6 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     bgColor: 'bg-gray-100',
     borderColor: 'border-gray-300',
   },
-  screening: {
-    label: '简历筛选中',
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
-    borderColor: 'border-amber-200',
-  },
   read: {
     label: '已读未回',
     color: 'text-blue-600',
@@ -104,7 +96,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     borderColor: 'border-blue-200',
   },
   rejected: {
-    label: '已拒绝',
+    label: '不合适',
     color: 'text-red-600',
     bgColor: 'bg-red-50',
     borderColor: 'border-red-200',
@@ -120,12 +112,6 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-50',
     borderColor: 'border-emerald-200',
-  },
-  accepted: {
-    label: '已接受',
-    color: 'text-emerald-700',
-    bgColor: 'bg-emerald-100',
-    borderColor: 'border-emerald-300',
   },
   declined: {
     label: '已拒绝Offer',
@@ -151,11 +137,9 @@ export const CHANNELS: Channel[] = ['官网', 'BOSS直聘', '实习僧', '牛客
 // 状态流转顺序（用于看板排序）
 export const STATUS_ORDER: ApplicationStatus[] = [
   'applied',
-  'screening',
   'read',
   'interview',
   'offer',
-  'accepted',
   'declined',
   'rejected',
 ];
