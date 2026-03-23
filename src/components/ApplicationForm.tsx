@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import type { Application } from '../types';
 import { JOB_TYPES, CHANNELS } from '../types';
-import { UrlParserInput } from './UrlParserInput';
 import { JDParserInput } from './JDParserInput';
 import { ResumeGenerator } from './resume/ResumeGenerator';
 import { hasAnyExperiences } from '../utils/experienceStorage';
-import type { ParsedJobData } from '../utils/urlParser';
-import type { ParsedJobData as JDParsedJobData } from '../utils/jobDescriptionParser';
+import type { ParsedJobData } from '../utils/jobDescriptionParser';
 
 interface ApplicationFormProps {
   initialData?: Partial<Application>;
@@ -43,11 +41,8 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Tab state for parser selection
-  const [activeParserTab, setActiveParserTab] = useState<'url' | 'jd'>('url');
-
-  // Handle parsed data from URL parser or JD parser
-  const handleParsedData = (parsedData: Partial<ParsedJobData> | Partial<JDParsedJobData>) => {
+  // Handle parsed data from JD parser
+  const handleParsedData = (parsedData: Partial<ParsedJobData>) => {
     setFormData(prev => ({
       ...prev,
       // Only override if the field is empty or if it's a new entry
@@ -86,44 +81,7 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
       {/* Auto-fill Parser - only show for new entries */}
       {isNewEntry && (
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-          {/* Tab Switcher */}
-          <div className="flex gap-2 mb-4 bg-white rounded-lg p-1 border border-gray-200">
-            <button
-              type="button"
-              onClick={() => setActiveParserTab('url')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                activeParserTab === 'url'
-                  ? 'bg-primary-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
-            >
-              🔗 粘贴链接解析
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveParserTab('jd')}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                activeParserTab === 'jd'
-                  ? 'bg-primary-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
-            >
-              📝 粘贴JD文本
-            </button>
-          </div>
-
-          {/* Tab Content */}
-          {activeParserTab === 'url' ? (
-            <UrlParserInput
-              onParsed={handleParsedData}
-              disabled={false}
-            />
-          ) : (
-            <JDParserInput
-              onParsed={handleParsedData}
-              disabled={false}
-            />
-          )}
+          <JDParserInput onParsed={handleParsedData} disabled={false} />
         </div>
       )}
 
