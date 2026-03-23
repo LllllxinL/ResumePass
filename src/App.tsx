@@ -5,6 +5,7 @@ import { KanbanBoard } from './components/KanbanBoard';
 import { Statistics } from './components/Statistics';
 import { DetailPanel } from './components/panels/DetailPanel';
 import { Modal } from './components/Modal';
+import { FeedbackModal } from './components/FeedbackModal';
 import { LoginPage } from './components/pages/LoginPage';
 import { UserMenu } from './components/auth/UserMenu';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -21,6 +22,7 @@ const MainApp = () => {
   const { user, logout } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<Application | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -148,7 +150,7 @@ const MainApp = () => {
                 </button>
               )}
               {/* 用户菜单 */}
-              {user && <UserMenu user={user} onLogout={logout} onOpenProfile={() => setViewMode('profile')} />}
+              {user && <UserMenu user={user} onLogout={logout} onOpenProfile={() => setViewMode('profile')} onOpenFeedback={() => setIsFeedbackOpen(true)} />}
             </div>
           </div>
         </div>
@@ -266,6 +268,11 @@ const MainApp = () => {
           }}
         />
       </Modal>
+
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+      />
     </div>
   );
 };
