@@ -9,10 +9,9 @@ import type { ParsedJobData } from '../utils/jobDescriptionParser';
 interface ApplicationFormProps {
   initialData?: Partial<Application>;
   onSubmit: (data: any) => void;
-  onCancel: () => void;
 }
 
-export const ApplicationForm = ({ initialData, onSubmit, onCancel }: ApplicationFormProps) => {
+export const ApplicationForm = ({ initialData, onSubmit }: ApplicationFormProps) => {
   const [formData, setFormData] = useState({
     companyName: initialData?.companyName || '',
     jobTitle: initialData?.jobTitle || '',
@@ -84,6 +83,16 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
           <JDParserInput onParsed={handleParsedData} disabled={false} />
         </div>
       )}
+
+      {/* 顶部保存按钮 */}
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="px-5 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+        >
+          保存
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -246,21 +255,6 @@ export const ApplicationForm = ({ initialData, onSubmit, onCancel }: Application
         />
       </div>
 
-      <div className="flex justify-end gap-3 pt-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          取消
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
-        >
-          保存
-        </button>
-      </div>
 
       {/* Resume Generator Modal */}
       {showResumeGenerator && (

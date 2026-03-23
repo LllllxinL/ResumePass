@@ -262,10 +262,6 @@ const MainApp = () => {
         <ApplicationForm
           initialData={editingApp || undefined}
           onSubmit={handleSubmit}
-          onCancel={() => {
-            setIsModalOpen(false);
-            setEditingApp(null);
-          }}
         />
       </Modal>
 
