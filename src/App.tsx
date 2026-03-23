@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, LayoutGrid, BarChart3, Search, Trash2, User, MessageSquare } from 'lucide-react';
+import { Plus, LayoutGrid, BarChart3, Search, Trash2, MessageSquare } from 'lucide-react';
 import { ApplicationForm } from './components/ApplicationForm';
 import { KanbanBoard } from './components/KanbanBoard';
 import { Statistics } from './components/Statistics';
@@ -125,17 +125,6 @@ const MainApp = () => {
                 统计
               </button>
               <button
-                onClick={() => setViewMode('profile')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'profile'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <User className="w-4 h-4" />
-                我的档案
-              </button>
-              <button
                 onClick={() => setViewMode('interviews')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'interviews'
@@ -159,7 +148,7 @@ const MainApp = () => {
                 </button>
               )}
               {/* 用户菜单 */}
-              {user && <UserMenu user={user} onLogout={logout} />}
+              {user && <UserMenu user={user} onLogout={logout} onOpenProfile={() => setViewMode('profile')} />}
             </div>
           </div>
         </div>
@@ -245,15 +234,6 @@ const MainApp = () => {
           >
             <BarChart3 className="w-5 h-5" />
             统计
-          </button>
-          <button
-            onClick={() => setViewMode('profile')}
-            className={`flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium transition-colors ${
-              viewMode === 'profile' ? 'text-primary-600' : 'text-gray-500'
-            }`}
-          >
-            <User className="w-5 h-5" />
-            档案
           </button>
           <button
             onClick={() => setViewMode('interviews')}

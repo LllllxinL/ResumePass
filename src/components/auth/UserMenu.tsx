@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { LogOut, ChevronDown } from 'lucide-react';
+import { LogOut, ChevronDown, User } from 'lucide-react';
 import type { User as UserType } from '../../contexts/AuthContext';
 
 interface UserMenuProps {
   user: UserType;
   onLogout: () => void;
+  onOpenProfile: () => void;
 }
 
-export const UserMenu = ({ user, onLogout }: UserMenuProps) => {
+export const UserMenu = ({ user, onLogout, onOpenProfile }: UserMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // 获取用户名字首字母作为头像
@@ -49,6 +50,16 @@ export const UserMenu = ({ user, onLogout }: UserMenuProps) => {
             </div>
 
             {/* 菜单项 */}
+            <button
+              onClick={() => {
+                onOpenProfile();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <User className="w-4 h-4" />
+              我的档案
+            </button>
             <button
               onClick={() => {
                 onLogout();
