@@ -11,16 +11,25 @@ interface KanbanBoardProps {
 
 export const KanbanBoard = ({ applications, onCardClick, onStatusChange }: KanbanBoardProps) => {
   const [draggedApp, setDraggedApp] = useState<string | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  // 横向滚动控制
+  // 同步横向滚动
+  const handleContentScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (headerRef.current) {
+      headerRef.current.scrollLeft = e.currentTarget.scrollLeft;
+    }
+  };
+
+  // 横向滚动控制（同时滚动内容和顶部标签）
   const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 300;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
+    const scrollAmount = 300;
+    const delta = direction === 'left' ? -scrollAmount : scrollAmount;
+    if (contentRef.current) {
+      contentRef.current.scrollBy({ left: delta, behavior: 'smooth' });
+    }
+    if (headerRef.current) {
+      headerRef.current.scrollBy({ left: delta, behavior: 'smooth' });
     }
   };
 
@@ -88,24 +97,63 @@ export const KanbanBoard = ({ applications, onCardClick, onStatusChange }: Kanba
       </div>
 
       {/* 桌面端：横向看板 */}
-      <div className="hidden md:block relative">
-        {/* 左滚动按钮 */}
-        <button
-          onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
+      <div className="hidden md:block">
+        {/* 顶部控制栏：状态标签 + 滚动按钮 */}
+        <div className="flex items-center gap-2 mb-3">
+          <button
+            onClick={() => scroll('left')}
+            className="w-7 h-7 bg-white shadow-sm border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors flex-shrink-0"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
 
-        {/* 右滚动按钮 */}
-        <button
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
+          <div ref={headerRef} className="flex-1 overflow-x-hidden">
+            <div className="flex gap-4 min-w-max">
+              {STATUS_ORDER.map((status) => {
+                const config = STATUS_CONFIG[status];
+                const apps = groupedApps[status] || [];
+                return (
+                  <div
+                    key={status}
+                    className={`w-72 flex-shrink-0 rounded-lg px-3 py-2 border-2 cursor-pointer hover:opacity-80 transition-opacity ${config.bgColor} ${config.borderColor}`}
+                    onClick={() => {
+                      // 滚动到该列
+                      const columnIndex = STATUS_ORDER.indexOf(status);
+                      const scrollPos = columnIndex * 296;
+                      if (contentRef.current) {
+                        contentRef.current.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                      }
+                      if (headerRef.current) {
+                        headerRef.current.scrollTo({ left: scrollPos, behavior: 'smooth' });
+                      }
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`font-medium text-sm ${config.color}`}>{config.label}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full bg-white/60 ${config.color}`}>
+                        {apps.length}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-        <div ref={scrollContainerRef} className="overflow-x-auto px-10">
+          <button
+            onClick={() => scroll('right')}
+            className="w-7 h-7 bg-white shadow-sm border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors flex-shrink-0"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 看板内容区域 */}
+        <div
+          ref={contentRef}
+          onScroll={handleContentScroll}
+          className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-220px)]"
+        >
           <div className="flex gap-4 min-w-max pb-4">
             {STATUS_ORDER.map((status) => {
               const config = STATUS_CONFIG[status];
@@ -118,15 +166,7 @@ export const KanbanBoard = ({ applications, onCardClick, onStatusChange }: Kanba
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, status)}
                 >
-                  <div className={`rounded-t-lg px-3 py-2 border-b-2 ${config.bgColor} ${config.borderColor}`}>
-                    <div className="flex items-center justify-between">
-                      <span className={`font-medium text-sm ${config.color}`}>{config.label}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${config.bgColor} ${config.color}`}>
-                        {apps.length}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 rounded-b-lg p-2 min-h-[200px] space-y-2">
+                  <div className="bg-gray-50 rounded-lg p-2 min-h-[200px] space-y-2">
                     {apps.map((app) => (
                       <KanbanCard
                         key={app.id}
