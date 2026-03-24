@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { Application } from '../types';
 import { STATUS_CONFIG, STATUS_ORDER } from '../types';
-import { Briefcase, MoreHorizontal } from 'lucide-react';
+import { Briefcase, MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface KanbanBoardProps {
   applications: Application[];
@@ -11,6 +11,18 @@ interface KanbanBoardProps {
 
 export const KanbanBoard = ({ applications, onCardClick, onStatusChange }: KanbanBoardProps) => {
   const [draggedApp, setDraggedApp] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // 横向滚动控制
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // 按状态分组
   const groupedApps = STATUS_ORDER.reduce((acc, status) => {
@@ -76,45 +88,63 @@ export const KanbanBoard = ({ applications, onCardClick, onStatusChange }: Kanba
       </div>
 
       {/* 桌面端：横向看板 */}
-      <div className="hidden md:block overflow-x-auto">
-        <div className="flex gap-4 min-w-max pb-4">
-          {STATUS_ORDER.map((status) => {
-            const config = STATUS_CONFIG[status];
-            const apps = groupedApps[status] || [];
+      <div className="hidden md:block relative">
+        {/* 左滚动按钮 */}
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
 
-            return (
-              <div
-                key={status}
-                className="w-72 flex-shrink-0"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, status)}
-              >
-                <div className={`rounded-t-lg px-3 py-2 border-b-2 ${config.bgColor} ${config.borderColor}`}>
-                  <div className="flex items-center justify-between">
-                    <span className={`font-medium text-sm ${config.color}`}>{config.label}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${config.bgColor} ${config.color}`}>
-                      {apps.length}
-                    </span>
+        {/* 右滚动按钮 */}
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-md border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+
+        <div ref={scrollContainerRef} className="overflow-x-auto px-10">
+          <div className="flex gap-4 min-w-max pb-4">
+            {STATUS_ORDER.map((status) => {
+              const config = STATUS_CONFIG[status];
+              const apps = groupedApps[status] || [];
+
+              return (
+                <div
+                  key={status}
+                  className="w-72 flex-shrink-0"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, status)}
+                >
+                  <div className={`rounded-t-lg px-3 py-2 border-b-2 ${config.bgColor} ${config.borderColor}`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`font-medium text-sm ${config.color}`}>{config.label}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${config.bgColor} ${config.color}`}>
+                        {apps.length}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-b-lg p-2 min-h-[200px] space-y-2">
+                    {apps.map((app) => (
+                      <KanbanCard
+                        key={app.id}
+                        application={app}
+                        onCardClick={() => onCardClick(app)}
+                        onDragStart={() => handleDragStart(app.id)}
+                      />
+                    ))}
+                    {apps.length === 0 && (
+                      <div className="text-center py-8 text-gray-400 text-sm">
+                        暂无记录
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-b-lg p-2 min-h-[200px] space-y-2">
-                  {apps.map((app) => (
-                    <KanbanCard
-                      key={app.id}
-                      application={app}
-                      onCardClick={() => onCardClick(app)}
-                      onDragStart={() => handleDragStart(app.id)}
-                    />
-                  ))}
-                  {apps.length === 0 && (
-                    <div className="text-center py-8 text-gray-400 text-sm">
-                      暂无记录
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </>
