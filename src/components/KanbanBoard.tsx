@@ -156,7 +156,6 @@ export const KanbanBoard = ({ applications, onCardClick, onStatusChange }: Kanba
         >
           <div className="flex gap-4 min-w-max pb-4">
             {STATUS_ORDER.map((status) => {
-              const config = STATUS_CONFIG[status];
               const apps = groupedApps[status] || [];
 
               return (
